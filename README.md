@@ -37,7 +37,6 @@ server := &webtransport.Server{
 	ListenAddr:     ":4433",
 	TLSCert:        webtransport.CertFile{Path: "cert.pem"},
 	TLSKey:         webtransport.CertFile{Path: "cert.key"},
-	AllowedOrigins: []string{"googlechrome.github.io", "127.0.0.1:8000", "localhost:8000"},
 }
 ```
 
