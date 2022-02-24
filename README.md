@@ -18,6 +18,10 @@ Web PKI certificates is not possible, for example, a device over the LAN which i
 
 Neither WebTransport nor HTTP/3 are standardized yet. We adhere to: [draft-ietf-quic-http-34](https://datatracker.ietf.org/doc/html/draft-ietf-quic-http-34) and [draft-ietf-webtrans-http3-02](https://datatracker.ietf.org/doc/html/draft-ietf-webtrans-http3-02).
 
+## Documentation
+
+[GoDoc](https://pkg.go.dev/github.com/adriancable/webtransport-go) has full documentation on `webtransport-go`'s public API.
+
 ## Complete Go server and browser-based client example
 
 Take a look at the [webtransport-go-example](https://github.com/adriancable/webtransport-go-example) repo for a complete server (and browser client) example.
