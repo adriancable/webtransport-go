@@ -13,55 +13,56 @@
 //
 // Set up the WebTransport server parameters:
 //
-// 	server := &webtransport.Server{
-// 		ListenAddr:     ":4433",
-// 		TLSCert:        webtransport.CertFile{Path: "cert.pem"},
-// 		TLSKey:         webtransport.CertFile{Path: "cert.key"},
-// 		AllowedOrigins: []string{"googlechrome.github.io", "localhost:8000", "new-tab-page"},
-// 	}
+//	server := &webtransport.Server{
+//		ListenAddr:     ":4433",
+//		TLSCert:        webtransport.CertFile{Path: "cert.pem"},
+//		TLSKey:         webtransport.CertFile{Path: "cert.key"},
+//		AllowedOrigins: []string{"googlechrome.github.io", "localhost:8000", "new-tab-page"},
+//	}
 //
 // Then, set up an http.Handler to accept a session, wait for an incoming bidirectional stream from the client, then (in this example) receive data and echo it back:
 //
-// 	http.HandleFunc("/counter", func(rw http.ResponseWriter, r *http.Request) {
-// 		session := r.Body.(*webtransport.Session)
-// 		session.AcceptSession()
-// 		defer session.CloseSession()
+//	http.HandleFunc("/counter", func(rw http.ResponseWriter, r *http.Request) {
+//		session := r.Body.(*webtransport.Session)
+//		session.AcceptSession()
+//		defer session.CloseSession()
 //
-// 		// Wait for incoming bidi stream
-// 		s, err := session.AcceptStream()
-// 		if err != nil {
-// 			return
-// 		}
+//		// Wait for incoming bidi stream
+//		s, err := session.AcceptStream()
+//		if err != nil {
+//			return
+//		}
 //
-// 		for {
-// 			buf := make([]byte, 1024)
-// 			n, err := s.Read(buf)
-// 			if err != nil {
-// 				break
-// 			}
-// 			fmt.Printf("Received from bidi stream %v: %s\n", s.StreamID(), buf[:n])
-// 			sendMsg := bytes.ToUpper(buf[:n])
-// 			fmt.Printf("Sending to bidi stream %v: %s\n", s.StreamID(), sendMsg)
-// 			s.Write(sendMsg)
-// 		}
-// 	}
+//		for {
+//			buf := make([]byte, 1024)
+//			n, err := s.Read(buf)
+//			if err != nil {
+//				break
+//			}
+//			fmt.Printf("Received from bidi stream %v: %s\n", s.StreamID(), buf[:n])
+//			sendMsg := bytes.ToUpper(buf[:n])
+//			fmt.Printf("Sending to bidi stream %v: %s\n", s.StreamID(), sendMsg)
+//			s.Write(sendMsg)
+//		}
+//	}
 //
 // Finally, start the server:
-// 	ctx, cancel := context.WithCancel(context.Background())
-// 	server.Run(ctx)
+//
+//	ctx, cancel := context.WithCancel(context.Background())
+//	server.Run(ctx)
 //
 // Here is a simple Chrome browser client to talk to this server. You can open a new browser tab and paste it into the Chrome DevTools console:
 //
-// 	let transport = new WebTransport("https://localhost:4433/counter");
-// 	await transport.ready;
-// 	let stream = await transport.createBidirectionalStream();
-// 	let encoder = new TextEncoder();
-// 	let decoder = new TextDecoder();
-// 	let writer = stream.writable.getWriter();
-// 	let reader = stream.readable.getReader();
-// 	await writer.write(encoder.encode("Hello, world!"))
-// 	console.log(decoder.decode((await reader.read()).value));
-// 	transport.close();
+//	let transport = new WebTransport("https://localhost:4433/counter");
+//	await transport.ready;
+//	let stream = await transport.createBidirectionalStream();
+//	let encoder = new TextEncoder();
+//	let decoder = new TextDecoder();
+//	let writer = stream.writable.getWriter();
+//	let reader = stream.readable.getReader();
+//	await writer.write(encoder.encode("Hello, world!"))
+//	console.log(decoder.decode((await reader.read()).value));
+//	transport.close();
 package webtransport
 
 import (
@@ -138,7 +139,7 @@ func (s *Server) Run(ctx context.Context) error {
 	}
 }
 
-func (s *Server) handleSession(ctx context.Context, sess quic.Session) {
+func (s *Server) handleSession(ctx context.Context, sess quic.Connection) {
 	serverControlStream, err := sess.OpenUniStream()
 	if err != nil {
 		return
@@ -330,10 +331,10 @@ func (s *SendStream) Write(p []byte) (int, error) {
 	return s.SendStream.Write(p)
 }
 
-// Session is a WebTransport session (and the Body of a WebTransport http.Request) wrapping the request stream (a quic.Stream), the two control streams and a quic.Session.
+// Session is a WebTransport session (and the Body of a WebTransport http.Request) wrapping the request stream (a quic.Stream), the two control streams and a quic.Connection.
 type Session struct {
 	quic.Stream
-	Session             quic.Session
+	Session             quic.Connection
 	ClientControlStream quic.ReceiveStream
 	ServerControlStream quic.SendStream
 	responseWriter      *h3.ResponseWriter
