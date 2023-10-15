@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lucas-clemente/quic-go"
 	"github.com/marten-seemann/qpack"
+	"github.com/quic-go/quic-go"
 )
 
 // DataStreamer lets the caller take over the stream. After a call to DataStream
