@@ -61,8 +61,8 @@ func (s SettingsMap) ToFrame() Frame {
 	}
 	f.Length = l
 	for id, val := range s {
-		quicvarint.Write(b, uint64(id))
-		quicvarint.Write(b, val)
+		b.Write(quicvarint.Append(nil, uint64(id)))
+		b.Write(quicvarint.Append(nil, val))
 	}
 	f.Data = b.Bytes()
 

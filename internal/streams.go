@@ -52,13 +52,13 @@ func (s *StreamHeader) Read(r io.Reader) error {
 func (s *StreamHeader) Write(w io.Writer) (int, error) {
 	buf := &bytes.Buffer{}
 
-	quicvarint.Write(buf, s.Type)
+	buf.Write(quicvarint.Append(nil, s.Type))
 	switch s.Type {
 	// One-byte streams
 	case STREAM_CONTROL, STREAM_QPACK_ENCODER, STREAM_QPACK_DECODER:
 	// Two-byte streams
 	case STREAM_PUSH, STREAM_WEBTRANSPORT_UNI_STREAM:
-		quicvarint.Write(buf, s.ID)
+		buf.Write(quicvarint.Append(nil, s.ID))
 	default:
 		// skip over unknown streams
 		return 0, fmt.Errorf("unknown stream type")
