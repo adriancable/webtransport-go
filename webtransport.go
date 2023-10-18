@@ -75,10 +75,10 @@ import (
 	"net/url"
 
 	"github.com/adriancable/webtransport-go/internal"
-	"github.com/lucas-clemente/quic-go"
-	"github.com/lucas-clemente/quic-go/http3"
-	"github.com/lucas-clemente/quic-go/quicvarint"
 	"github.com/marten-seemann/qpack"
+	"github.com/quic-go/quic-go"
+	"github.com/quic-go/quic-go/http3"
+	"github.com/quic-go/quic-go/quicvarint"
 )
 
 type receiveMessageResult struct {
@@ -320,8 +320,8 @@ func (s *SendStream) Write(p []byte) (int, error) {
 	if s.writeHeaderBeforeData && !s.headerWritten {
 		// Unidirectional stream - so we need to write stream header before first data write
 		buf := &bytes.Buffer{}
-		quicvarint.Write(buf, h3.STREAM_WEBTRANSPORT_UNI_STREAM)
-		quicvarint.Write(buf, s.requestSessionID)
+		buf.Write(quicvarint.Append(nil, h3.STREAM_WEBTRANSPORT_UNI_STREAM))
+		buf.Write(quicvarint.Append(nil, s.requestSessionID))
 		if _, err := s.SendStream.Write(buf.Bytes()); err != nil {
 			s.Close()
 			return 0, err
@@ -369,7 +369,7 @@ func (s *Session) ReceiveMessage(ctx context.Context) ([]byte, error) {
 	resultChannel := make(chan receiveMessageResult)
 
 	go func() {
-		msg, err := s.Session.ReceiveMessage()
+		msg, err := s.Session.ReceiveMessage(ctx)
 		resultChannel <- receiveMessageResult{msg: msg, err: err}
 	}()
 
@@ -398,7 +398,7 @@ func (s *Session) SendMessage(msg []byte) error {
 	buf := &bytes.Buffer{}
 
 	// "Quarter Stream ID" (!) of associated request stream, as per https://datatracker.ietf.org/doc/html/draft-ietf-masque-h3-datagram
-	quicvarint.Write(buf, uint64(s.StreamID()/4))
+	buf.Write(quicvarint.Append(nil, uint64(s.StreamID()/4)))
 	buf.Write(msg)
 	return s.Session.SendMessage(buf.Bytes())
 }
@@ -436,8 +436,8 @@ func (s *Session) internalOpenStream(ctx *context.Context, sync bool) (Stream, e
 	if err == nil {
 		// Write frame header
 		buf := &bytes.Buffer{}
-		quicvarint.Write(buf, h3.FRAME_WEBTRANSPORT_STREAM)
-		quicvarint.Write(buf, uint64(s.StreamID()))
+		buf.Write(quicvarint.Append(nil, h3.FRAME_WEBTRANSPORT_STREAM))
+		buf.Write(quicvarint.Append(nil, uint64(s.StreamID())))
 		if _, err := stream.Write(buf.Bytes()); err != nil {
 			stream.Close()
 		}
