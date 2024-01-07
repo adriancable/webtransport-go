@@ -65,7 +65,7 @@ http.HandleFunc("/counter", func(rw http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Sending to bidi stream %v: %s\n", s.StreamID(), sendMsg)
 		s.Write(sendMsg)
 	}
-}
+})
 ```
 
 Finally, start the server:
