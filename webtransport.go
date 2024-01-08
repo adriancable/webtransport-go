@@ -74,7 +74,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/adriancable/webtransport-go/internal"
+	h3 "github.com/adriancable/webtransport-go/internal"
 	"github.com/marten-seemann/qpack"
 	"github.com/quic-go/quic-go"
 	"github.com/quic-go/quic-go/http3"
@@ -470,7 +470,7 @@ func (s *Session) OpenStreamSync(ctx context.Context) (Stream, error) {
 	return s.internalOpenStream(&ctx, true)
 }
 
-// OpenUniStream creates an outgoing (that is, server-initiated) bidirectional stream. It returns immediately.
+// OpenUniStream creates an outgoing (that is, server-initiated) unidirectional stream. It returns immediately.
 func (s *Session) OpenUniStream() (SendStream, error) {
 	return s.internalOpenUniStream(nil, false)
 }
